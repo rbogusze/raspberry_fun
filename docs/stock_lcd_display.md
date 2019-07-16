@@ -68,7 +68,7 @@ $ python demo_lcd.py
 Writing to display
 (and you should see the display working)
 ```
-![RaspPi](../images/lcd6.jpg?raw=true "Title")
+![RaspPi](../images/lcd7.jpg?raw=true "Title")
 
 
 `$ vi lcddriver.py`
