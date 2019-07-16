@@ -4,7 +4,7 @@ This project started when my kid (8 years old) started to getting some "serious"
 
 Raspberry pi with small LCD display seemed perfect for the job.
 
-Technology choises.
+Technology choices.
 
 1. For display I picked LCD 2x16 HD44780 with I2C
 
@@ -16,7 +16,7 @@ It is just a pleasure to write in python. I have done too many bash scripts, tim
 
 3. Database to store the data will be Cassandra
 
-This is not an obvious choise, but actually fits well into the requirements. I have been working for a long time as an Oracle DBA but realized there it more in world to explore if you like data and right now I am trying new things. MySQL / MariaDB would be a fine choise here as well as a light general purpose relational database, but Cassandra as a NoSQL database fits the picture nicely as well. Especially if you have couple of Raspberry Pis already running in the house - it is very easy to turn them into Cassandra cluster with data replication happening magically between them :)
+This is not an obvious choice, but actually fits well into the requirements. I have been working for a long time as an Oracle DBA but realized there it more in world to explore if you like data and right now I am trying new things. MySQL / MariaDB would be a fine choice here as well as a light general purpose relational database, but Cassandra as a NoSQL database fits the picture nicely as well. Especially if you have couple of Raspberry Pis already running in the house - it is very easy to turn them into Cassandra cluster with data replication happening magically between them :)
 
 Ok, let's start the fun.
 
@@ -249,7 +249,7 @@ Install required packages (this can take a while, around 1-2h so better to shutd
 ```
 
 
-Check out repository with scripts (that is a lot of varius stuff but we will use only small part of ot)
+Check out repository with scripts (that is a lot of various stuff but we will use only small part of it)
 ```
 $ cd
 $ svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
@@ -284,5 +284,3 @@ Several notes:
 
 
 
-## ToDo
-- spell check
