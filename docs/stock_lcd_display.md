@@ -189,17 +189,97 @@ cqlsh> desc keyspaces
 system_traces  system_auth  system  system_distributed
 ```
 
+## Create data model
 
+Create keyspace (something like a database in mysql) and tables.
+```
+# /opt/cassandra/bin/cqlsh 192.168.1.20
+cqlsh> CREATE KEYSPACE "stock" WITH replication = {'class' : 'NetworkTopologyStrategy','dc1' : 1};
+cqlsh> CREATE TABLE stock.transactions (
+asset text, 
+tran_date date, 
+amount float, 
+price float,
+note text,
+PRIMARY KEY (asset, tran_date)
+);
+
+cqlsh> CREATE TABLE stock.quotes (
+asset text, 
+quote_date date, 
+price float,
+PRIMARY KEY (asset, quote_date)
+);
+
+cqlsh> CREATE TABLE stock.savings (
+influx_date date, 
+amount float,
+note text, 
+PRIMARY KEY (influx_date)
+);
+
+```
+
+Let's populate it with some data
+
+```
+# /opt/cassandra/bin/cqlsh 192.168.1.20
+> use stock;
+> INSERT INTO transactions (asset, tran_date, amount, price, note) values ('mbk', '2019-07-08', 2, 404, '1/3 from birthday money');
+> INSERT INTO stock.quotes (asset, quote_date, price) values ('mbk', '2019-07-07', 408);
+> INSERT INTO stock.savings (influx_date, amount, note) values ('2019-07-08', 477, 'birthday money in savings');
+
+> select * from stock.transactions;
+> select * from stock.quotes;
+> select * from stock.savings;
+
+```
 
 
 
 
 ## Glue it all together
 
+Install required packages (this can take a while, around 1-2h so better to shutdown Cassandra as it takes a lot of memory)
+```
+# systemctl stop cassandra.service
+# apt install -y subversion python-pip build-essential python-dev git python-rpi.gpio python-dateutil
+# pip install cassandra-driver kafka-python
+# systemctl start cassandra.service
+```
+
+
 Check out repository with scripts (that is a lot of varius stuff but we will use only small part of ot)
-$ sudo apt install -y subversion
+```
 $ cd
 $ svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
+$ cd scripto/python/stock/
+```
+
+Just test if we can connect to Cassandra from python.
+```
+$ python test_cassandra.py 
+mbk 2019-07-08 2.0
+```
+
+Configure correct Cassandra cluster IP
+```
+$ vi stock.py
+cluster = Cluster(contact_points=['192.168.1.20'] (leave the rest of line like it is)
+$ python stock.py
+
+```
+
+And you should see the LCD working now and computing current value.
+
+![RaspPi](../images/lcd8.jpg?raw=true "Title")
+
+![RaspPi](../images/lcd9.jpg?raw=true "Title")
+
+Several notes:
+- display is turned off in the night to avoid disruption in case it is installed in kids room (like in my case)
+- to get the current stock readings I use stooq.pl page with very simple text parsing, I am fine with daily accuracy. It has reading for Polish stock market (where I live and invest) but it should be trivial to adjust it to other sites
+
 
 
 
