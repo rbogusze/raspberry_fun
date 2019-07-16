@@ -51,3 +51,5 @@ $ ssh -l pi 192.168.1.20
 ```
 
 Tarararara.
+
+![RaspPi](images/lcd1.jpg?raw=true "Title")
