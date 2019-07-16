@@ -22,6 +22,8 @@ Ok, let's start the fun.
 
 # Raspberry Pi setup
 
+![RaspPi](../images/lcd5.jpg?raw=true "Title")
+
 Downloaded Raspbian Buster Lite from https://www.raspberrypi.org/downloads/raspbian/ burn on SD card and run RaspberryPi with it.
 
 ```
@@ -50,6 +52,29 @@ Now you can login remotely to your raspberry
 $ ssh -l pi 192.168.1.20
 ```
 
-Tarararara.
+## Connect LCD display
 
-![RaspPi](../images/lcd5.jpg?raw=true "Title")
+I followed the https://www.youtube.com/watch?v=fR5XhHYzUK0
+
+```
+$ cd
+$ sudo apt install -y git
+$ git clone https://github.com/the-raspberry-pi-guy/lcd.git
+$ cd lcd/
+$ sudo sh install.sh
+(at the end RPi will reboot, just relogin after 1min)
+$ cd lcd/
+$ python demo_lcd.py
+Writing to display
+(and you should see the display working)
+```
+![RaspPi](../images/lcd6.jpg?raw=true "Title")
+
+
+`$ vi lcddriver.py`
+
+
+Check out repository with scripts (that is a lot a lot of varius stuff but we will use only small part of ot)
+$ sudo apt install -y subversion
+$ cd
+$ svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
