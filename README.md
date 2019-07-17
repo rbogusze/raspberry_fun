@@ -6,5 +6,5 @@ Displaying how much do I own in stock for kids.
 [Stock LCD display](docs/stock_lcd_display.md)
 
 Gathering temperature around the house.
-[WIP]
+[Temperature gathering](docs/temperature_gathering.md)
 
