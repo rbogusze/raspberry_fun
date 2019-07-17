@@ -1,3 +1,12 @@
+
+![RaspPi](../images/lcd10.jpg?raw=true "Title")
+
+![RaspPi](../images/lcd11.jpg?raw=true "Title")
+
+![RaspPi](../images/lcd12.jpg?raw=true "Title")
+
+![RaspPi](../images/lcd13.jpg?raw=true "Title")
+
 # Motivation
 
 This project started when my kid (8 years old) started to getting some "serious" money at various occasions, like 100$ or more on birthday. It was too much to let him spend it all on Pepsi and Milky-way's and he already had a need to save it to make some large purchases like big Lego set. First I just said I will invest it for him but then he was asking everyday how much it grew today and was upset when it was falling down. I did not want to be the one telling bad news and was just tired of checking. I needed something that will tell him how much he owns and what was the gain/loss today. 
