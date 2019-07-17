@@ -277,13 +277,11 @@ $ python stock.py
 
 And you should see the LCD working now and computing current value.
 
-![RaspPi](../images/lcd8.jpg?raw=true "Title")
-
-![RaspPi](../images/lcd9.jpg?raw=true "Title")
+![RaspPi](../images/lcd8.jpg?raw=true "Title") ![RaspPi](../images/lcd9.jpg?raw=true "Title")
 
 Several notes:
 - display is turned off in the night to avoid disruption in case it is installed in kids room (like in my case)
-- to get the current stock readings I use stooq.pl page with very simple text parsing, I am fine with daily accuracy. It has reading for Polish stock market (where I live and invest) but it should be trivial to adjust it to other sites
+- to get the current stock readings I use stooq.pl page with very simple text parsing, I am fine with daily accuracy. It has reading for the polish stock market (where I live and invest) but it should be trivial to adjust it to other sites
 
 
 
