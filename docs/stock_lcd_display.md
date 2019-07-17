@@ -1,11 +1,7 @@
 
-![RaspPi](../images/lcd10.jpg?raw=true "Title")
+![RaspPi](../images/lcd10.jpg?raw=true "Title") ![RaspPi](../images/lcd11.jpg?raw=true "Title")
 
-![RaspPi](../images/lcd11.jpg?raw=true "Title")
-
-![RaspPi](../images/lcd12.jpg?raw=true "Title")
-
-![RaspPi](../images/lcd13.jpg?raw=true "Title")
+![RaspPi](../images/lcd12.jpg?raw=true "Title") ![RaspPi](../images/lcd13.jpg?raw=true "Title")
 
 # Motivation
 
