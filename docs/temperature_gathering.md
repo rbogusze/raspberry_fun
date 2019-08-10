@@ -365,6 +365,11 @@ $ cd scripto/python/temperature/
 
 ![RaspPi](../images/temp5.png)
 
+| Producers | Consumers | Misc       |
+|-----------|-----------|------------|
+| producer1 | mysql     | monitoring |
+
+
 Ok, first let's just see how many transactions per second (TPS) we can get from one really old Raspberry Pi 1 that is writing temperature readings into RDBMS mysql running on Raspberry Pi 2 and see where the bottleneck is.
 
 On producer1
