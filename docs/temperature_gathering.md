@@ -526,7 +526,7 @@ We reached a point where the test is hindered by a weak client, that is unable t
 
 ## Two producers -> mysql
 
-![RaspPi](../images/temp12.png?raw=true)
+![RaspPi](../images/temp12.jpg?raw=true)
 
 | Producers | Consumers | Misc       |
 |-----------|-----------|------------|
@@ -555,7 +555,7 @@ Looks like it is time to add another producer. It will be again very old Raspber
 
 
 ## Three producers -> mysql
-![RaspPi](../images/temp13.png)
+![RaspPi](../images/temp13.jpg)
 
 | Producers | Consumers | Misc       |
 |-----------|-----------|------------|
@@ -574,7 +574,7 @@ That 600TPS is pretty sweet score already, but it looks like we need more produc
 
 ## Introducing Fourth producer
 
-![RaspPi](../images/temp14.png)
+![RaspPi](../images/temp14.jpg)
 
 | Producers | Consumers | Misc       |
 |-----------|-----------|------------|
