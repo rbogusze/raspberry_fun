@@ -155,7 +155,6 @@ On every node that needs to be monitored we need to:
 
 Nice links:
 - https://askubuntu.com/questions/87035/how-to-check-hard-disk-performance
-- 
 
 First let's establish some hardware limits on the Raspberry Pis I will use. That will let us to see the bottlenecks.
 
@@ -297,7 +296,7 @@ EOF
 
 Now it should be visible under port 9104
 
-http://your_ip:9104
+http://mysql:9104
 
 Make mysqld_exporter to autostart on system boot
 ```
@@ -502,6 +501,7 @@ Let's see if our tests with producer confirm that findings.
 ### One producer + mysql test repeated
 
 | mysql_commit_frequency | King TPS | Sams TPS | prod CPU   | bottleneck |
+|------------------------|----------|----------|------------|------------|
 | 0 (every row)          | 12       | 32       | 30         | mysql IO   |
 | 10 (every 10th row)    | 24       | 138      | 73 (const) | ?          |
 | 100                    | 44       | 162      | 83 (const) | producer1  |
@@ -512,7 +512,7 @@ Nice, this gives us pretty stable 160 TPS and finally it looks like the bottlene
 
 This is nicely visible in:
 
-![RaspPi](../images/temp11.png)
+![RaspPi](../images/temp11.png?raw=true)
 
 Every decrease in the commint frequency causes less load on the IO subsystem.
 
@@ -526,7 +526,7 @@ We reached a point where the test is hindered by a weak client, that is unable t
 
 ## Two producers -> mysql
 
-![RaspPi](../images/temp12.png)
+![RaspPi](../images/temp12.png?raw=true)
 
 | Producers | Consumers | Misc       |
 |-----------|-----------|------------|
