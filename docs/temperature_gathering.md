@@ -185,7 +185,7 @@ Sequential READ
     read: IOPS=22, BW=22.1MiB/s (23.1MB/s)(4004MiB/181433msec)
     iops        : min=    2, max=   70, avg=22.16, stdev= 3.70, samples=357
 
-![RaspPi](../images/2019-08-0711-22-32.png)
+![RaspPi](../images/temp1.png)
 
 
 
@@ -195,7 +195,7 @@ Sequential WRITE
     write: IOPS=8, BW=9205KiB/s (9426kB/s)(1622MiB/180437msec); 0 zone resets
     iops        : min=    2, max=   72, avg=20.68, stdev=23.77, samples=153
 
-![RaspPi](../images/2019-08-07-11-27-38.png)
+![RaspPi](../images/temp2.png)
 
 
 
@@ -208,7 +208,7 @@ Mixed random 4K read and write QD1 with sync
 
 (all before can be seen here)
 
-![RaspPi](../images/2019-08-07-11-33-11.png)
+![RaspPi](../images/temp3.png)
 
 What is important from this test is that we can max out our SD card performance in two different ways. First is a sequential throuput, where we can read around 20MB/s or write 10MB/s. Second is the number of random IO that can happen, and it is actually very poor with this SD card and can go up to around 30IOPS.
 
@@ -237,7 +237,7 @@ Ok, this one does not cause any IO activity, so we are just measuring network th
 |---------|--------------------|
 | ingress | up to 11MB/s       |
 
-![RaspPi](../images/2019-07-22-14-23-09.png)
+![RaspPi](../images/temp4.png)
 
 According to https://www.raspberrypi.org/products/raspberry-pi-2-model-b/
 tested Raspberry Pi 2 Model B has 100 Base Ethernet, which is around what we see
@@ -363,7 +363,7 @@ $ cd scripto/python/temperature/
 
 ## One producer + mysql
 
-![RaspPi](../images/2019-07-25-16.53.02.jpg)
+![RaspPi](../images/temp5.png)
 
 Ok, first let's just see how many transactions per second (TPS) we can get from one really old Raspberry Pi 1 that is writing temperature readings into RDBMS mysql running on Raspberry Pi 2 and see where the bottleneck is.
 
