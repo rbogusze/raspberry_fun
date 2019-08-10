@@ -1,24 +1,18 @@
 # (WIP) Motivation and roadmap
 
-192.168.1.99 kafka 
-192.168.1.20 monitoring 
-192.168.1.90 mysql
-192.168.1.97 producer1
-192.168.1.29 producer2
-192.168.1.101 producer2
-
 Gathering information like temperature is a perfect case to have a lot of fun with, use different technologies just to see if they fit the picture well and provide something that is cool to watch.
 
 I can see the scenario as follows:
 1. gather CPU temperature that is already available in Raspberry Pi
-2. store it in Cassandra database that was already used in [Stock LCD display](docs/stock_lcd_display.md)
-3. store it in Kafka, as messagin system like that is perfect for such job and it just a beatiful concept to decouple producers of data from consumers of data
-4. store it in old good RDBMS MySQL, but this time the script that gathers the temperature will not even know about that - we will use Kafka for that, as the data is already there
-5. display it on Grafana, just to have a nice view
+2. store it in old good RDBMS MySQL
+3. store it in Cassandra database that was already used in [Stock LCD display](docs/stock_lcd_display.md)
+4. store it in Kafka, as messagin system like that is perfect for such job and it is just a beatiful concept to decouple producers of data from consumers of data
+5. store it in old good RDBMS MySQL, but this time the script that gathers the temperature will not even know about that - we will use Kafka for that, as the data is already there
+6. display it on Grafana, just to have a nice view
 
 Even more fun with data
 1. configure Kafka to store the data "since the beginning" which will allow us to build external systems for analysis like Hadoop
-2. play with Kafka and see how we can make it brak/fix/scale
+2. play with Kafka and see how we can make it break/fix/scale
 
 # First things first
 
@@ -37,23 +31,19 @@ Node exporter installation
 # md5sum node_exporter-0.18.1.linux-armv7.tar.gz
 f9b28f4bfeecc4fe17b441098117359c  node_exporter-0.18.1.linux-armv7.tar.gz
 # tar xvzf node_exporter-0.18.1.linux-armv7.tar.gz
-# cd node_exporter-0.18.1.linux-armv7
-# nohup ./node_exporter &
 # cd /opt
 # ln -s node_exporter-0.18.1.linux-armv7 node_exporter
 
 or for Raspberry Pi 1
+# cd /opt
 # wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-armv6.tar.gz
 # md5sum node_exporter-0.18.1.linux-armv6.tar.gz 
 83611c07f3728175b81f3631df12eba8  node_exporter-0.18.1.linux-armv6.tar.gz
 # tar xvzf node_exporter-0.18.1.linux-armv6.tar.gz
-# cd node_exporter-0.18.1.linux-armv6
-# nohup ./node_exporter &
 # cd /opt
 # ln -s node_exporter-0.18.1.linux-armv6 node_exporter
 ```
-http://monitoring:9100/metrics
--> you should see lot's of metrics
+
 
 Make node_exporter to autostart on system boot
 ```
@@ -77,7 +67,8 @@ WantedBy=multi-user.target
 # systemctl start node_exporter.service
 # systemctl status node_exporter.service
 ```
-
+http://monitoring:9100/metrics
+-> you should see lot's of metrics
 
 Prometheus server installation
 ```
@@ -173,12 +164,20 @@ First let's establish some hardware limits on the Raspberry Pis I will use. That
 # cd /opt
 ```
 
-CPU test
+### CPU test
 ```
 # sysbench --test=cpu --num-threads=4 --cpu-max-prime=20000 run
 ```
 
-IO Test, following advise from https://askubuntu.com/questions/87035/how-to-check-hard-disk-performance
+
+
+### IO Test
+
+Nice links:
+- https://askubuntu.com/questions/87035/how-to-check-hard-disk-performance
+- https://devconnected.com/monitoring-disk-i-o-on-linux-with-the-node-exporter/
+- https://www.robustperception.io/mapping-iostat-to-the-node-exporters-node_disk_-metrics
+
 ```
 Sequential READ 
 # fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
@@ -224,7 +223,39 @@ What is important from this test is that we can max out our SD card performance 
 
 ? How to know if I have random or sequential IO right now
 
-Network test
+2019.08.06 repeating the test
+Screenshot from 2019-08-06 22-59-29.png
+-> actually similar results to what I have seen with Samsung SD card
+
+What is this "time spent doing I/O" metric?
+http://mysql:9100/metrics
+node_disk_io_time_seconds_total
+'Total seconds spent doing I/Os' 
+
+Repeated tests with Kingston SD
+Sequential READ 
+read: IOPS=22, BW=22.1MiB/s (23.1MB/s)(4004MiB/181433msec)
+iops        : min=    2, max=   70, avg=22.16, stdev= 3.70, samples=357
+Screenshot from 2019-08-07 11-22-32.png
+
+Sequential WRITE
+write: IOPS=8, BW=9205KiB/s (9426kB/s)(1622MiB/180437msec); 0 zone resets
+iops        : min=    2, max=   72, avg=20.68, stdev=23.77, samples=153
+Screenshot from 2019-08-07 11-27-38.png
+
+Mixed random 4K read and write QD1 with sync
+read: IOPS=3, BW=12.0KiB/s (12.3kB/s)(2172KiB/180296msec)
+write: IOPS=3, BW=13.1KiB/s (13.4kB/s)(2360KiB/180296msec); 0 zone resets
+iops        : min=    2, max=   18, avg= 7.80, stdev= 3.87, samples=150
+Screenshot from 2019-08-07 11-33-11.png (all before can be seen here)
+
+Random 4K read QD1 
+read: IOPS=1080, BW=4321KiB/s (4424kB/s)(759MiB/180001msec)
+iops        : min=  986, max= 1184, avg=1079.97, stdev=25.44, samples=359
+Screenshot from 2019-08-07 11-44-39.png
+
+
+### Network test
 
 $ scp oko4.img pi@mysql:
 
@@ -263,7 +294,13 @@ CREATE TABLE temperature.reading (
     reading_note VARCHAR(20),
     reading_value float
 );
+> create user remik;
+> grant all on temperature.* to 'remik'@'%' identified by 'remik';
 
+Listen on all interfaces
+# vi /etc/mysql/mariadb.conf.d/50-server.cnf
+bind-address = 0.0.0.0
+# systemctl restart mariadb
 ```
 
 Setting up mysql metrics for Prometheus. 
@@ -331,8 +368,311 @@ Add another target and job to Prometheus
 
 ```
 
+Import dashboard to Grafana
+(big plus sign) -> Import 
+Grafana.com Dashboard: 7362
+(for example I picked https://grafana.com/grafana/dashboards/7362 but browse through them to pick the one you like)
 
-## Install Kafkac
+
+# Producers
+
+## Crazy Temperature producer
+
+Let's create a producer that will provide a lot of data, that would mimic heavy load. For lack of better idea that will be CPU temperature.
+
+Just to 
+
+```
+$ ssh -l pi producer1
+$ sudo apt-get update
+$ sudo apt install -y subversion python-pip build-essential python-dev git python-rpi.gpio python-dateutil
+$ sudo python -m pip install mysql-connector
+$ cd
+$ svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
+$ cd scripto/python/temperature/
+
+```
+
+# Mysql
+
+## One producer + mysql
+
+'2019-07-25 16.53.02.jpg'
+
+Ok, first let's just see how many transactions per second (TPS) we can get from one really old Raspberry Pi 1 that is writing temperature readings into RDBMS mysql running on Raspberry Pi 2 and see where the bottleneck is.
+
+On producer1
+```
+$ cd ~/scripto/python/temperature
+```
+
+Make sure we are using only mysql backend and that we are not introducing any sleep between the temperature readings
+```
+$ vi collect.py
+backend_mysql = True
+backend_cassandra = False
+backend_kafka = False
+
+sleep_time = 0 #in seconds
+mysql_commit_frequency = 0
+```
+
+Let's run the script, it should print the TPS ratings
+```
+$ python collect.py
+INFO - TPS: 19 Average TPS: 12
+```
+
+And let's look what is the bottleneck now.
+
+Producer seems to be fine, 10% CPU, no IOs.
+
+Mysql server on the other hand seems to suffer from IO.
+
+Checking Grafana Node, Disk Detail section
+
+Screenshot from 2019-07-25 15-42-06.png
+Screenshot from 2019-08-07 11-07-19.png
+
+I believe the one certain way to say that we are suffering from IO bottleneck is to look at 'Time Spent Doing I/Os' metric, where when it reaches 1s it means that for 1s all the system was doing was waiting 1s for IO. It is kind of weird, and probably something like %IO utilisation would be better here, but if we tread it like in 1s I was doing IO for 1s then it is clear that IO it all that is happening.
+
+
+So, so far we can handle on average 12 TPS and mysql IO subsystem is the bottleneck. We could try to improve that by upgrading to a better/faster SD card but first let's understand why this is happening.
+
+The way this simple producer is written is that after every insert into the table a commit is issued. In RDBMS like mysql commit is a pretty expensive operation in terms of IO, as the database has be sure that data is permanently written to disk before returning a confirmation to the client that the commit succeeded.
+
+This is something that usually is a business decision, when to commit, but in this simple situation it really does not matter that much if we lose some data in case of system crash.
+
+Let's allow the producer to commit less frequently. I have prepared the script with a parameter that controls how often commit is requested.
+
+First let's commit every 10th insert and see what happens.
+
+```
+$ vi collect.py
+mysql_commit_frequency = 10
+```
+
+| mysql_commit_frequency | avg TPS |
+| 0 (every row)          | 12      |
+| 10 (every 10th row)    | 24      |
+
+
+That has improved the throuput a lot, now we can do 24 TPS, producer has 25% CPU utilisation and the bottleneck is still mysql IO performance.
+
+Let's bump it up again and keep it bumping up and see what is happening.
+
+```
+$ vi collect.py
+mysql_commit_frequency = 100
+```
+
+| mysql_commit_frequency | avg TPS | producer CPU   | bottleneck             |
+| 0 (every row)          | 12      | 10             | mysql IO               |
+| 10 (every 10th row)    | 24      | 25             | mysql IO               |
+| 100                    | 44      | 25             | mysql IO               |
+| 1000                   | 115     | 75 (sometimes) | producer1 CPU/mysql IO |
+| 10000                  | 107     | 75 (sometimes) | producer1 CPU/mysql IO |
+
+Ok, so we reached a point when if there is no IO bottlenect on mysql site then producer1 is doing around 170TPS and that is maxing out the producer1's CPU capability. When there is IO issue the producer's CPU drops to 25% and is making 60TPS. The average is as above in table, and we can see the bottleneck moving between producer1 and mysql.
+
+Anyway I am pretty disapointed with the IO performance of the SD card I am currently using. This is common Kingston C4 card. Let's try with something different, namely Samsung EVO Plus. 
+
+
+## mysql with Samsung SD cards
+
+### IO performance tests repeated
+Sequential READ 
+read: IOPS=22, BW=22.2MiB/s (23.3MB/s)(4028MiB/181441msec)
+iops        : min=    2, max=   82, avg=22.24, stdev= 4.55, samples=357
+Screenshot from 2019-08-06 18-35-07.png
+
+Sequential WRITE
+write: IOPS=16, BW=16.7MiB/s (17.5MB/s)(3040MiB/182247msec); 0 zone resets
+iops        : min=    1, max=   78, avg=22.90, stdev=19.83, samples=261
+Screenshot from 2019-08-06 18-40-43.png
+
+Random 4K read QD1 
+read: IOPS=1371, BW=5484KiB/s (5616kB/s)(964MiB/180001msec)
+iops        : min= 1256, max= 1540, avg=1370.62, stdev=41.79, samples=360
+Screenshot from 2019-08-06 21-09-32.png
+
+Mixed random 4K read and write QD1 with sync
+read: IOPS=13, BW=53.6KiB/s (54.8kB/s)(9652KiB/180223msec)
+write: IOPS=13, BW=55.9KiB/s (57.2kB/s)(9.83MiB/180223msec); 0 zone resets
+iops        : min=    1, max=  160, avg=24.44, stdev=33.71, samples=205
+Screenshot from 2019-08-06 21-29-01.png
+
+Three tests one after another to see where is the common
+Screenshot from 2019-08-06 21-44-32.png
+Screenshot from 2019-08-06 21-44-58.png
+-> whenever I see there 'Time Spent Doing IOs' reaches 1s it means we have an IO bottleneck.
+
+
+
+Comparing IO performance
+
+|                       | Kingston               | Samsung SD card              |
+| Sequential READ       | IOPS=22, BW=22.1MiB/s  | IOPS=22, BW=22.2MiB/s        |
+| Sequential READ IO    | max=70 avg=22 stdev=3  | max=82 avg=22.24 stdev=4.55  |
+| Sequential WRITE      | IOPS=8, BW=9205KiB/s   | IOPS=16, BW=16.7MiB/s        |
+| Sequential WRITE IO   | max=72 avg=20 stdev=23 | max=78 avg=22.90 stdev=19.83 |
+| Random 4K read QD1    | IOPS=1080, BW=4321KiB  | IOPS=1371, BW=5484KiB/s      |
+| Random 4K read QD1 IO | max= 1184, avg=1079.97 | max= 1540, avg=1370.62       |
+| Mixed random 4K READ  | IOPS=3, BW=12.0KiB/s   | IOPS=13, BW=53.6KiB/s        |
+| Mixed random 4K WRITE | IOPS=3, BW=13.1KiB/s   | IOPS=13, BW=55.9KiB/s        |
+| Mixed random 4K IO    | max=18 avg=7 stdev=3.8 | max=160 avg=24.44 stdev=33.7 |
+
+Conclusion: All the tests seem more or less equal except the most important one, which is 'Mixed random 4K' as this one does waht usually happens in system with RDBMS Database - a mix of random and sequential IO. With Samsung we have around 4 x better results. 
+
+Let's see if our tests with producer confirm that findings.
+
+
+
+### One producer + mysql test repeated
+
+| mysql_commit_frequency | King TPS | Sams TPS | prod CPU   | bottleneck |
+| 0 (every row)          | 12       | 32       | 30         | mysql IO   |
+| 10 (every 10th row)    | 24       | 138      | 73 (const) | ?          |
+| 100                    | 44       | 162      | 83 (const) | producer1  |
+| 1000                   | 115      | 166      | 85 (const) | producer1  |
+| 10000                  | 107      | 171      | 85 (const) | producer1  |
+
+Nice, this gives us pretty stable 160 TPS and finally it looks like the bottleneck moved to producer, as we are hitting around 80-90% CPU utilisation while at the mysql site the metric 'Time Spent Doing I/Os' is below 40ms, which means that the host is not IO bound. 
+
+This is nicely visible in:
+
+Screenshot from 2019-08-07 13-25-51.png
+
+Every decrease in the commint frequency causes less load on the IO subsystem.
+
+IO still does happen on the mysql server, but we are not forcing a disk sync at every commit, and as a result do not stress it that much.
+
+Conclusion: We started with 32 TPS with commit at every insert and up to 170 TPS with no commit at all. As it hardly resembles reality it gives us an overview of what is possible with current setup. 
+
+We reached a point where the test is hindered by a weak client, that is unable to produce any more data let's add another one.
+
+
+
+## Two producers -> mysql
+
+'2019-07-25 19.37.30.jpg'
+
+Configure the producer2 as producer1:
+- install prometheus node exporter as above
+- checkout scripto directory that contains producer script collect.py as above
+
+There is no point to test it from both producers with commit after every insert as we have already determined this is causing IO isuues on mysql site. let's start with every 10th row.
+
+Actually let's execute twice the producer's scripts, that way we can really use all CPU on producers.
+
+
+
+| mysql_commit_frequency | TPS | mysql             | prod    | bottleneck |
+| 10 (every 10th row)    | 393 | CPU 24%, 300ms IO | 94% CPU | prod       |
+| 100                    | 399 | CPU 17%, 110ms IO | 98% CPU | prod       |
+| 1000                   | 401 | CPU 16%, 80ms IO  | 98% CPU | prod       |
+
+In general again as long as we do not commit every insert the IO load on the mysql consumer is within capacity and we max out producer's CPU.
+
+Looks like it is time to add another producer. It will be again very old Raspberry Pi 1 from 2011 as I have lot's of them laying around.
+
+
+## Three producers -> mysql
+2019-08-08 16.35.01.jpg
+
+Now I am launching twice the same stress script from each producer, this gives me nice almost 100% CPU utilisation on them despite the fact that those poor Pi's have only one CPU.
+
+| mysql_commit_frequency | TPS | mysql             | prod    | bottleneck |
+| 10 (every 10th row)    | 593 | CPU 32%, 500ms IO | 91% CPU | prod       |
+| 100                    | 600 | CPU 24%, 100ms IO | 98% CPU | prod       |
+| 1000                   | 593 | CPU 22%, 60ms IO  | 99% CPU | prod       |
+
+That 600TPS is pretty sweet score already, but it looks like we need more producers to really hammer this mysql instance.
+
+## Introducing Fourth producer
+'2019-08-08 21.04.59.jpg'
+
+I have run out of Raspberry Pi 1, time to pick up something more powerful. RPi2mB is the one that will produce as well.
+
+Testing with just one collect script:
+
+    mysql_commit_frequency = 10
+    $ python collect.py
+	
+That is a change visible already, as previously one `collect.py` script was able to create 138TPS with 73% CPU utilized, this time I can see the producer average of 235TPS and that is causing 11% CPU busy. Nice, as this Pi 2 has 4 CPUs we can expect a nice performance boost.
+
+It has been noted previously that even with RPi1, which has 1 CPU it is beneficial to execute 2 producer scripts, as this really fully uses the available CPU. With 4 CPUs we would have to execute 8 collect.py scripts, so it is time to automate it a bit and create a wrapper around `$ python collect.py` - this is `multi_collect.sh` bash script that will spawn two `collect.py` scripts for every CPU thread it finds on the host.
+
+That way just running one script we fully make use of the producer's CPU. So, again.
+
+    mysql_commit_frequency = 10
+    $ ./multi_collect.sh
+
+That alone stresses the IO on mysql site, even with `mysql_commit_frequency = 10` but gives us incredible 1500TPS.
+
+| mysql_commit_frequency | TPS  | consumer          | producer4 | bottleneck |
+| 10                     | 1500 | CPU 60%, IO 800ms | CPU 68%   | consumer   |
+| 100                    | 1700 | CPU 56%, IO 300ms | CPU 88%   | producer   |
+| 1000                   | 1850 | CPU 52%, IO 109ms | CPU 92%   | producer   |
+
+And this is all from one producer. Actually we reached another milestone, where the mysql consumer is unable to sustain the IO load with a commit every 10 inserts. To be able to increase the rate producers are issuing the inserts we needed to introduce even longer breaks with the commit frequency. Let's see how far we can go with all producers.
+
+| mysql_commit_frequency | TPS  | consumer          | producer1-4 | bottleneck |
+| 100                    | 2150 | CPU 71%, IO 375ms | CPU 77-83%  | producer   |
+| 1000                   | 2260 | CPU 68%, IO 166ms | CPU 85-97%  | producer   |
+
+
+Ok, that should be it for now with mysql consumer. Anyway commiting every 100th row is serious compromise, but could be valid in many IOT systems. I am honestly impressed how well mysql handles small inserts.
+
+
+
+# Cassandra (WIP)
+
+First I will be using the same Raspberry Pi that was used for mysql just to compare apples to apples.
+
+Shutdown mysql
+
+```
+# systemctl stop mariadb
+# systemctl disable mariadb
+# systemctl stop mysqld_exporter
+# systemctl disable mysqld_exporter
+```
+
+Install cassandra as described in stock_lcd_display.md
+
+    # systemctl start cassandra.service
+	
+Wait few minutes and check if cassandra is up
+
+    # /opt/cassandra/bin/nodetool status 
+
+On producer hosts install cassandra-driver
+
+    # pip install cassandra-driver
+
+
+Create keyspace (something like a database in mysql) and tables.
+```
+# /opt/cassandra/bin/cqlsh 192.168.1.90
+CREATE KEYSPACE "temperature" WITH replication = {'class' : 'NetworkTopologyStrategy','dc1' : 1};
+
+CREATE TABLE temperature.reading (
+    reading_location text,
+    reading_date date,
+    reading_note text,
+    reading_value float,
+    PRIMARY KEY (reading_location, reading_date)
+);
+```
+Configure correct Cassandra cluster IP
+$ cd ~/scripto/python/temperature
+$ vi collect.py
+cluster = Cluster(contact_points=['192.168.1.20'] (leave the rest of line like it is)
+
+
+
+# Kafka (WIP)
 
 Download Kafka from https://kafka.apache.org/downloads
 ```
@@ -355,23 +695,3 @@ Let's produce some messages
 
 
 
-## Data model
-We are still using Cassandra as the primary data backend.
-
-Create keyspace (something like a database in mysql) and tables.
-```
-# /opt/cassandra/bin/cqlsh 192.168.1.20
-CREATE KEYSPACE "temperature" WITH replication = {'class' : 'NetworkTopologyStrategy','dc1' : 1};
-
-CREATE TABLE temperature.reading (
-    reading_location text,
-    reading_date date,
-    reading_note text,
-    reading_value float,
-    PRIMARY KEY (reading_location, reading_date)
-);
-```
-Configure correct Cassandra cluster IP
-$ cd ~/scripto/python/temperature
-$ vi collect.py
-cluster = Cluster(contact_points=['192.168.1.20'] (leave the rest of line like it is)
