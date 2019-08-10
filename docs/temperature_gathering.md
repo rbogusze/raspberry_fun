@@ -224,7 +224,8 @@ One certain way to say that we are suffering from IO bottleneck is to look at 'T
 I know that there some CPU overhead associated with scp, but in general it should show the expected performance.
 
 |         | RPi 2 Model B V1.1 |
-| ingress | up to 9MB/s       |
+|---------|--------------------|
+| ingress | up to 9MB/s        |
 
 Now, as our SD card write performance is similar, it may be that I am seeing disk performance.
 
@@ -244,6 +245,8 @@ tested Raspberry Pi 2 Model B has 100 Base Ethernet, which is around what we see
 
 
 ## Install mysql + datamodel
+
+Install MariaDB which is a MySQL spin-off after it was purchased by Oracle.
 
 ```
 # apt-get install -y mariadb-server
@@ -292,7 +295,9 @@ EOF
 # ./mysqld_exporter --config.my-cnf=".my.cnf"
 ```
 
-http://192.168.1.90:9104
+Now it should be visible under port 9104
+
+http://your_ip:9104
 
 Make mysqld_exporter to autostart on system boot
 ```
@@ -358,7 +363,7 @@ $ cd scripto/python/temperature/
 
 ## One producer + mysql
 
-'2019-07-25 16.53.02.jpg'
+![RaspPi](../images/2019-07-25-16.53.02.jpg)
 
 Ok, first let's just see how many transactions per second (TPS) we can get from one really old Raspberry Pi 1 that is writing temperature readings into RDBMS mysql running on Raspberry Pi 2 and see where the bottleneck is.
 
