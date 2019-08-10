@@ -194,8 +194,8 @@ Sequential WRITE
     # fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=write --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
     write: IOPS=8, BW=9205KiB/s (9426kB/s)(1622MiB/180437msec); 0 zone resets
     iops        : min=    2, max=   72, avg=20.68, stdev=23.77, samples=153
-Screenshot from 2019-08-07 11-27-38.png
 
+![RaspPi](../images/2019-08-07-11-27-38.png)
 
 
 
@@ -205,34 +205,21 @@ Mixed random 4K read and write QD1 with sync
     read: IOPS=3, BW=12.0KiB/s (12.3kB/s)(2172KiB/180296msec)
     write: IOPS=3, BW=13.1KiB/s (13.4kB/s)(2360KiB/180296msec); 0 zone resets
     iops        : min=    2, max=   18, avg= 7.80, stdev= 3.87, samples=150
-Screenshot from 2019-08-07 11-33-11.png (all before can be seen here)
 
+(all before can be seen here)
 
+![RaspPi](../images/2019-08-07-11-33-11.png)
 
-
-
-
-
-
-What is important from this test is that we can max out our SD card performance in two different way. First is a sequential throuput, where we can read around 20MB/s or write 10MB/s. Second is the number of random IO that can happen, and it is actually very poor with this SD card and can go up to around 30IOPS.
+What is important from this test is that we can max out our SD card performance in two different ways. First is a sequential throuput, where we can read around 20MB/s or write 10MB/s. Second is the number of random IO that can happen, and it is actually very poor with this SD card and can go up to around 30IOPS.
 
 The point is to be able to say that our IO subsystem is the bottleneck. 
 
 One certain way to say that we are suffering from IO bottleneck is to look at 'Time Spent Doing I/Os' metric, where when it reaches 1s it means that for 1s all the system was doing was waiting 1s for IO. It is kind of weird, and probably something like %IO utilisation would be better here, but if we tread it like in 1s I was doing IO for 1s then it is clear that IO it all that is happening.
 
 
-
-
-
-
-
-
-
 ### Network test
 
-$ scp oko4.img pi@mysql:
-
-Screenshot from 2019-07-22 14-18-26.png
+    $ scp oko4.img pi@mysql:
 
 I know that there some CPU overhead associated with scp, but in general it should show the expected performance.
 
@@ -241,14 +228,14 @@ I know that there some CPU overhead associated with scp, but in general it shoul
 
 Now, as our SD card write performance is similar, it may be that I am seeing disk performance.
 
-$ scp oko4.img pi@mysql:/dev/null
+    $ scp oko4.img pi@mysql:/dev/null
 
 Ok, this one does not cause any IO activity, so we are just measuring network throughput and a bit of CPU.
 
 |         | RPi 2 Model B V1.1 |
 | ingress | up to 11MB/s       |
 
-Screenshot from 2019-07-22 14-23-09.png
+![RaspPi](../images/2019-07-22-14-23-09.png)
 
 According to https://www.raspberrypi.org/products/raspberry-pi-2-model-b/
 tested Raspberry Pi 2 Model B has 100 Base Ethernet, which is around what we see
