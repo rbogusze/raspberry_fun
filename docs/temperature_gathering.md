@@ -402,8 +402,9 @@ Mysql server on the other hand seems to suffer from IO.
 
 Checking Grafana Node, Disk Detail section
 
-Screenshot from 2019-07-25 15-42-06.png
 Screenshot from 2019-08-07 11-07-19.png
+
+![RaspPi](../images/temp6.png "Screenshot from 2019-08-07 11-07-19.png")
 
 So far we can handle on average 12 TPS and mysql IO subsystem is the bottleneck. We could try to improve that by upgrading to a better/faster SD card but first let's understand why this is happening.
 
