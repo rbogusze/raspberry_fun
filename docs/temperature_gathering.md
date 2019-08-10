@@ -184,6 +184,7 @@ Sequential READ
     # fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
     read: IOPS=22, BW=22.1MiB/s (23.1MB/s)(4004MiB/181433msec)
     iops        : min=    2, max=   70, avg=22.16, stdev= 3.70, samples=357
+
 ![RaspPi](../images/Screenshot from 2019-08-07 11-22-32.png)
 
 
