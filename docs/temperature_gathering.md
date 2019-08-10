@@ -402,9 +402,7 @@ Mysql server on the other hand seems to suffer from IO.
 
 Checking Grafana Node, Disk Detail section
 
-Screenshot from 2019-08-07 11-07-19.png
-
-![RaspPi](../images/temp6.png "Screenshot from 2019-08-07 11-07-19.png")
+![RaspPi](../images/temp6.png)
 
 So far we can handle on average 12 TPS and mysql IO subsystem is the bottleneck. We could try to improve that by upgrading to a better/faster SD card but first let's understand why this is happening.
 
@@ -422,6 +420,7 @@ mysql_commit_frequency = 10
 ```
 
 | mysql_commit_frequency | avg TPS |
+|------------------------|---------|
 | 0 (every row)          | 12      |
 | 10 (every 10th row)    | 24      |
 
@@ -436,6 +435,7 @@ mysql_commit_frequency = 100
 ```
 
 | mysql_commit_frequency | avg TPS | producer CPU   | bottleneck             |
+|------------------------|---------|----------------|------------------------|
 | 0 (every row)          | 12      | 10             | mysql IO               |
 | 10 (every 10th row)    | 24      | 25             | mysql IO               |
 | 100                    | 44      | 25             | mysql IO               |
@@ -451,36 +451,38 @@ Anyway I am pretty disapointed with the IO performance of the SD card I am curre
 
 ### IO performance tests repeated
 Sequential READ 
-read: IOPS=22, BW=22.2MiB/s (23.3MB/s)(4028MiB/181441msec)
-iops        : min=    2, max=   82, avg=22.24, stdev= 4.55, samples=357
-Screenshot from 2019-08-06 18-35-07.png
+
+	read: IOPS=22, BW=22.2MiB/s (23.3MB/s)(4028MiB/181441msec)
+	iops        : min=    2, max=   82, avg=22.24, stdev= 4.55, samples=357
+
+![RaspPi](../images/temp7.png)
 
 Sequential WRITE
-write: IOPS=16, BW=16.7MiB/s (17.5MB/s)(3040MiB/182247msec); 0 zone resets
-iops        : min=    1, max=   78, avg=22.90, stdev=19.83, samples=261
-Screenshot from 2019-08-06 18-40-43.png
 
-Random 4K read QD1 
-read: IOPS=1371, BW=5484KiB/s (5616kB/s)(964MiB/180001msec)
-iops        : min= 1256, max= 1540, avg=1370.62, stdev=41.79, samples=360
-Screenshot from 2019-08-06 21-09-32.png
+	write: IOPS=16, BW=16.7MiB/s (17.5MB/s)(3040MiB/182247msec); 0 zone resets
+	iops        : min=    1, max=   78, avg=22.90, stdev=19.83, samples=261
+
+![RaspPi](../images/temp8.png)
 
 Mixed random 4K read and write QD1 with sync
-read: IOPS=13, BW=53.6KiB/s (54.8kB/s)(9652KiB/180223msec)
-write: IOPS=13, BW=55.9KiB/s (57.2kB/s)(9.83MiB/180223msec); 0 zone resets
-iops        : min=    1, max=  160, avg=24.44, stdev=33.71, samples=205
-Screenshot from 2019-08-06 21-29-01.png
+
+	read: IOPS=13, BW=53.6KiB/s (54.8kB/s)(9652KiB/180223msec)
+	write: IOPS=13, BW=55.9KiB/s (57.2kB/s)(9.83MiB/180223msec); 0 zone resets
+	iops        : min=    1, max=  160, avg=24.44, stdev=33.71, samples=205
+
+![RaspPi](../images/temp9.png)
 
 Three tests one after another to see where is the common
-Screenshot from 2019-08-06 21-44-32.png
-Screenshot from 2019-08-06 21-44-58.png
--> whenever I see there 'Time Spent Doing IOs' reaches 1s it means we have an IO bottleneck.
 
+![RaspPi](../images/temp10.png)
+
+-> whenever I see there 'Time Spent Doing IOs' reaches 1s it means we have an IO bottleneck.
 
 
 Comparing IO performance
 
 |                       | Kingston               | Samsung SD card              |
+|-----------------------|------------------------|------------------------------|
 | Sequential READ       | IOPS=22, BW=22.1MiB/s  | IOPS=22, BW=22.2MiB/s        |
 | Sequential READ IO    | max=70 avg=22 stdev=3  | max=82 avg=22.24 stdev=4.55  |
 | Sequential WRITE      | IOPS=8, BW=9205KiB/s   | IOPS=16, BW=16.7MiB/s        |
@@ -510,7 +512,7 @@ Nice, this gives us pretty stable 160 TPS and finally it looks like the bottlene
 
 This is nicely visible in:
 
-Screenshot from 2019-08-07 13-25-51.png
+![RaspPi](../images/temp11.png)
 
 Every decrease in the commint frequency causes less load on the IO subsystem.
 
@@ -524,7 +526,12 @@ We reached a point where the test is hindered by a weak client, that is unable t
 
 ## Two producers -> mysql
 
-'2019-07-25 19.37.30.jpg'
+![RaspPi](../images/temp12.png)
+
+| Producers | Consumers | Misc       |
+|-----------|-----------|------------|
+| producer1 | mysql     | monitoring |
+| producer2 |           |            |
 
 Configure the producer2 as producer1:
 - install prometheus node exporter as above
@@ -537,6 +544,7 @@ Actually let's execute twice the producer's scripts, that way we can really use 
 
 
 | mysql_commit_frequency | TPS | mysql             | prod    | bottleneck |
+|------------------------|-----|-------------------|---------|------------|
 | 10 (every 10th row)    | 393 | CPU 24%, 300ms IO | 94% CPU | prod       |
 | 100                    | 399 | CPU 17%, 110ms IO | 98% CPU | prod       |
 | 1000                   | 401 | CPU 16%, 80ms IO  | 98% CPU | prod       |
@@ -547,7 +555,13 @@ Looks like it is time to add another producer. It will be again very old Raspber
 
 
 ## Three producers -> mysql
-2019-08-08 16.35.01.jpg
+![RaspPi](../images/temp13.png)
+
+| Producers | Consumers | Misc       |
+|-----------|-----------|------------|
+| producer1 | mysql     | monitoring |
+| producer2 |           |            |
+| producer3 |           |            |
 
 Now I am launching twice the same stress script from each producer, this gives me nice almost 100% CPU utilisation on them despite the fact that those poor Pi's have only one CPU.
 
@@ -559,7 +573,15 @@ Now I am launching twice the same stress script from each producer, this gives m
 That 600TPS is pretty sweet score already, but it looks like we need more producers to really hammer this mysql instance.
 
 ## Introducing Fourth producer
-'2019-08-08 21.04.59.jpg'
+
+![RaspPi](../images/temp14.png)
+
+| Producers | Consumers | Misc       |
+|-----------|-----------|------------|
+| producer1 | mysql     | monitoring |
+| producer2 |           |            |
+| producer3 |           |            |
+| producer4 |           |            |
 
 I have run out of Raspberry Pi 1, time to pick up something more powerful. RPi2mB is the one that will produce as well.
 
@@ -580,6 +602,7 @@ That way just running one script we fully make use of the producer's CPU. So, ag
 That alone stresses the IO on mysql site, even with `mysql_commit_frequency = 10` but gives us incredible 1500TPS.
 
 | mysql_commit_frequency | TPS  | consumer          | producer4 | bottleneck |
+|------------------------|------|-------------------|-----------|------------|
 | 10                     | 1500 | CPU 60%, IO 800ms | CPU 68%   | consumer   |
 | 100                    | 1700 | CPU 56%, IO 300ms | CPU 88%   | producer   |
 | 1000                   | 1850 | CPU 52%, IO 109ms | CPU 92%   | producer   |
@@ -587,6 +610,7 @@ That alone stresses the IO on mysql site, even with `mysql_commit_frequency = 10
 And this is all from one producer. Actually we reached another milestone, where the mysql consumer is unable to sustain the IO load with a commit every 10 inserts. To be able to increase the rate producers are issuing the inserts we needed to introduce even longer breaks with the commit frequency. Let's see how far we can go with all producers.
 
 | mysql_commit_frequency | TPS  | consumer          | producer1-4 | bottleneck |
+|------------------------|------|-------------------|-------------|------------|
 | 100                    | 2150 | CPU 71%, IO 375ms | CPU 77-83%  | producer   |
 | 1000                   | 2260 | CPU 68%, IO 166ms | CPU 85-97%  | producer   |
 
@@ -635,9 +659,10 @@ CREATE TABLE temperature.reading (
 );
 ```
 Configure correct Cassandra cluster IP
-$ cd ~/scripto/python/temperature
-$ vi collect.py
-cluster = Cluster(contact_points=['192.168.1.20'] (leave the rest of line like it is)
+
+	$ cd ~/scripto/python/temperature
+	$ vi collect.py
+	cluster = Cluster(contact_points=['192.168.1.20'] (leave the rest of line like it is)
 
 
 
