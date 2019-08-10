@@ -5,6 +5,6 @@ Below are some projects I did in my spare time just for fun, to learn new techno
 Displaying how much do I own in stock for kids. 
 [Stock LCD display](docs/stock_lcd_display.md)
 
-Gathering temperature around the house.
+Gathering temperature around the house started a project that compares how flood of inserts is handled by MySQL, Cassandra and Kafka.
 [Temperature gathering](docs/temperature_gathering.md)
 

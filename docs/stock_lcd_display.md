@@ -184,7 +184,7 @@ Start Cassandra
 # systemctl status cassandra.service
 ```
 
-Check if you can connect to it
+Wait 5min. Check if you can connect to it
 ```
 # /opt/cassandra/bin/nodetool status
 --  Address       Load       Tokens       Owns (effective)  Host ID                               Rack
@@ -284,6 +284,9 @@ Several notes:
 - to get the current stock readings I use stooq.pl page with very simple text parsing, I am fine with daily accuracy. It has reading for the polish stock market (where I live and invest) but it should be trivial to adjust it to other sites
 
 
+# Things to try
 
+1. Add another node to Cassandra and increase the replication factor to really use this incredible piece of software
+2. Use ansible to automate everything we did so far manually
 
 
