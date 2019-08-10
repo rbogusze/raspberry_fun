@@ -233,6 +233,7 @@ Now, as our SD card write performance is similar, it may be that I am seeing dis
 Ok, this one does not cause any IO activity, so we are just measuring network throughput and a bit of CPU.
 
 |         | RPi 2 Model B V1.1 |
+|---------|--------------------|
 | ingress | up to 11MB/s       |
 
 ![RaspPi](../images/2019-07-22-14-23-09.png)
