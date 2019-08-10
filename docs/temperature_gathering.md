@@ -178,81 +178,53 @@ Nice links:
 - https://devconnected.com/monitoring-disk-i-o-on-linux-with-the-node-exporter/
 - https://www.robustperception.io/mapping-iostat-to-the-node-exporters-node_disk_-metrics
 
-```
-Sequential READ 
-# fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
 
-Screenshot from 2019-07-22 13-51-14.png
+Sequential READ 
+
+    # fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=read --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
+    read: IOPS=22, BW=22.1MiB/s (23.1MB/s)(4004MiB/181433msec)
+    iops        : min=    2, max=   70, avg=22.16, stdev= 3.70, samples=357
+![RaspPi](../images/Screenshot from 2019-08-07 11-22-32.png)
+
+
 
 Sequential WRITE
-# fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=write --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
 
-Screenshot from 2019-07-22 13-53-44.png (to compare it with previous)
+    # fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=write --size=1500m --io_size=10g --blocksize=1024k --ioengine=libaio --fsync=10000 --iodepth=32 --direct=1 --numjobs=1 --runtime=180 --group_reporting
+    write: IOPS=8, BW=9205KiB/s (9426kB/s)(1622MiB/180437msec); 0 zone resets
+    iops        : min=    2, max=   72, avg=20.68, stdev=23.77, samples=153
+Screenshot from 2019-08-07 11-27-38.png
 
 
-Random 4K read QD1 
-# fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=randread --size=500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=180 --group_reporting
 
-(must be from cache)
-Screenshot from 2019-07-22 13-59-20.png
 
 Mixed random 4K read and write QD1 with sync
-# fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=randrw --size=1500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=180 --group_reporting
 
-'Screenshot from 2019-07-22 13-46-11.png'
-
-Screenshot from 2019-07-22 14-02-07.png (maybe this Disk R/W time is good indicator or IO bottleneck?)
-
-Screenshot from 2019-07-22 14-04-24.png
-
-```
+    # fio --name TEST --eta-newline=5s --filename=fio-tempfile.dat --rw=randrw --size=1500m --io_size=10g --blocksize=4k --ioengine=libaio --fsync=1 --iodepth=1 --direct=1 --numjobs=1 --runtime=180 --group_reporting
+    read: IOPS=3, BW=12.0KiB/s (12.3kB/s)(2172KiB/180296msec)
+    write: IOPS=3, BW=13.1KiB/s (13.4kB/s)(2360KiB/180296msec); 0 zone resets
+    iops        : min=    2, max=   18, avg= 7.80, stdev= 3.87, samples=150
+Screenshot from 2019-08-07 11-33-11.png (all before can be seen here)
 
 
-|                    | RPi 2 Model B V1.1     |
-| cpu total time:    | 148.6189s              |
-| Sequential READ    | 22.7MB/s , 40IOPS      |
-| Sequential WRITE   | 9608kB/s , 20IOPS      |
-| Random 4K read QD1 | 5MB , 1200IOPS (must be cache) |
-| Mixed random 4K    | R/W: 20.0kB/s , 10IOPS |
+
+
+
+
+
 
 What is important from this test is that we can max out our SD card performance in two different way. First is a sequential throuput, where we can read around 20MB/s or write 10MB/s. Second is the number of random IO that can happen, and it is actually very poor with this SD card and can go up to around 30IOPS.
 
-? The point is to be able to say that our SD card is the bottleneck if we experience 
+The point is to be able to say that our IO subsystem is the bottleneck. 
 
-? Important fact to take out of that is that with currect hardware (not so great SD card, will test it again on some solid one) we can either have sequential reads with some
+One certain way to say that we are suffering from IO bottleneck is to look at 'Time Spent Doing I/Os' metric, where when it reaches 1s it means that for 1s all the system was doing was waiting 1s for IO. It is kind of weird, and probably something like %IO utilisation would be better here, but if we tread it like in 1s I was doing IO for 1s then it is clear that IO it all that is happening.
 
-? How to know if I have random or sequential IO right now
 
-2019.08.06 repeating the test
-Screenshot from 2019-08-06 22-59-29.png
--> actually similar results to what I have seen with Samsung SD card
 
-What is this "time spent doing I/O" metric?
-http://mysql:9100/metrics
-node_disk_io_time_seconds_total
-'Total seconds spent doing I/Os' 
 
-Repeated tests with Kingston SD
-Sequential READ 
-read: IOPS=22, BW=22.1MiB/s (23.1MB/s)(4004MiB/181433msec)
-iops        : min=    2, max=   70, avg=22.16, stdev= 3.70, samples=357
-Screenshot from 2019-08-07 11-22-32.png
 
-Sequential WRITE
-write: IOPS=8, BW=9205KiB/s (9426kB/s)(1622MiB/180437msec); 0 zone resets
-iops        : min=    2, max=   72, avg=20.68, stdev=23.77, samples=153
-Screenshot from 2019-08-07 11-27-38.png
 
-Mixed random 4K read and write QD1 with sync
-read: IOPS=3, BW=12.0KiB/s (12.3kB/s)(2172KiB/180296msec)
-write: IOPS=3, BW=13.1KiB/s (13.4kB/s)(2360KiB/180296msec); 0 zone resets
-iops        : min=    2, max=   18, avg= 7.80, stdev= 3.87, samples=150
-Screenshot from 2019-08-07 11-33-11.png (all before can be seen here)
 
-Random 4K read QD1 
-read: IOPS=1080, BW=4321KiB/s (4424kB/s)(759MiB/180001msec)
-iops        : min=  986, max= 1184, avg=1079.97, stdev=25.44, samples=359
-Screenshot from 2019-08-07 11-44-39.png
 
 
 ### Network test
@@ -434,10 +406,7 @@ Checking Grafana Node, Disk Detail section
 Screenshot from 2019-07-25 15-42-06.png
 Screenshot from 2019-08-07 11-07-19.png
 
-I believe the one certain way to say that we are suffering from IO bottleneck is to look at 'Time Spent Doing I/Os' metric, where when it reaches 1s it means that for 1s all the system was doing was waiting 1s for IO. It is kind of weird, and probably something like %IO utilisation would be better here, but if we tread it like in 1s I was doing IO for 1s then it is clear that IO it all that is happening.
-
-
-So, so far we can handle on average 12 TPS and mysql IO subsystem is the bottleneck. We could try to improve that by upgrading to a better/faster SD card but first let's understand why this is happening.
+So far we can handle on average 12 TPS and mysql IO subsystem is the bottleneck. We could try to improve that by upgrading to a better/faster SD card but first let's understand why this is happening.
 
 The way this simple producer is written is that after every insert into the table a commit is issued. In RDBMS like mysql commit is a pretty expensive operation in terms of IO, as the database has be sure that data is permanently written to disk before returning a confirmation to the client that the commit succeeded.
 
