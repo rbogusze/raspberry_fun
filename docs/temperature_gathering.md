@@ -185,7 +185,7 @@ Sequential READ
     read: IOPS=22, BW=22.1MiB/s (23.1MB/s)(4004MiB/181433msec)
     iops        : min=    2, max=   70, avg=22.16, stdev= 3.70, samples=357
 
-![RaspPi](../images/Screenshot from 2019-08-07 11-22-32.png)
+![RaspPi](../images/2019-08-0711-22-32.png)
 
 
 
