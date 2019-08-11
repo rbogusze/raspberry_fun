@@ -677,6 +677,7 @@ Just to warm things up let's compare the performance of one producer with Kafka 
 
 
 | Backend | TPS producer4, one thread | Prod util | Cons util         |
+|---------|---------------------------|-----------|-------------------|
 | MySQL   | 238                       | CPU 11%   | CPU 21%, IO 320ms |
 | Kafka   | 147                       | CPU 25%   | CPU 9%, IO 4ms    |
 
@@ -690,6 +691,7 @@ Let's see how the test goes if we run it like we did with the best score for far
 	$ ./multi_collect.sh --backend kafka
 
 | Backend | TPS prod1-4, 2xCPU thr | Prod     | Cons util         | bottleneck |
+|---------|------------------------|----------|-------------------|------------|
 | MySQL   | 2840                   | CPU 70%  | CPU 90%, IO 233ms | consumer   |
 | Kafka   | 2600                   | CPU 100% | CPU 22%, IO 151ms | producers  |
 
