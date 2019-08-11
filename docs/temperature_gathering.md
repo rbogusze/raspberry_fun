@@ -615,7 +615,92 @@ And this is all from one producer. Actually we reached another milestone, where 
 | 1000                   | 2260 | CPU 68%, IO 166ms | CPU 85-97%  | producer   |
 
 
-Ok, that should be it for now with mysql consumer. Anyway commiting every 100th row is serious compromise, but could be valid in many IOT systems. I am honestly impressed how well mysql handles small inserts.
+Ok, we are getting closer to utilise another resource on consumer side, namely CPU. Anyway commiting every 100th row is serious compromise, but could be valid in many IOT systems. I am honestly impressed how well mysql handles small inserts.
+
+
+## Replacing Third consumer
+
+![RaspPi](../images/temp15.jpg)
+
+Looks like I need more power on the consumers. To limit the number of them I will replace on RPi 1 with RPi 2 which is at least 4 times more powerfull in terms of CPU.
+
+    mysql_commit_frequency = 100
+    $ ./multi_collect.sh
+	
+| commit_fr | TPS       | consumer          | producer1-4 | bottleneck      |
+|-----------|-----------|-------------------|-------------|-----------------|
+| 100       | 1500-2500 | CPU 89%, IO 500ms | CPU 62%     | consumer CPU+IO |
+| 1000      | 2840      | CPU 90%, IO 233ms | CPU 70%     | consumer CPU    |
+
+That is it. We are able to make consumer mysql to reach its capabilities both at:
+1. IO subsystem - actually we were able to do this very early when we commit every insert with only one producer, but with all producers and commit every 100rows we finally reach to the point where IO wait time is substantial and can be considered as bottleneck. 
+2. CPU - even with commit every 1000 rows, where IO is not substantially stressed we reach 90% CPU utilisation while producers are at 70%.
+
+What could be done if we want to scale more? That is the main issue with RDBMS database, that they basically scale well only vertically so we could buy better storage and bigger server but there is a limit to that. At some point the bigger/faster storage/server is very expensive and we have a problem.
+
+Anyway it is a great score, let's see how other databases can deal with such a task.
+
+# Kafka (WIP)
+
+Download Kafka from https://kafka.apache.org/downloads
+```
+# cd /opt
+# wget http://ftp.man.poznan.pl/apache/kafka/2.3.0/kafka_2.12-2.3.0.tgz
+# sha512sum kafka_2.12-2.3.0.tgz 
+a5ed591ab304a1f16f7fd64183871e38aabf814a2c1ca86bb3d064c83e85a6463d3c55f4d707a29fc3d7994dd7ba1f790b5a6219c6dffdf472afd99cee37892e  kafka_2.12-2.3.0.tgz
+# tar xvzf kafka_2.12-2.3.0.tgz
+# export PATH=$PATH:/opt/kafka_2.12-2.3.0/bin
+
+# cd /opt/kafka_2.12-2.3.0
+# bin/zookeeper-server-start.sh config/zookeeper.properties &
+```
+
+Before starting Kafka, let's decrease the memory first to avoid Out Of Memory errors.
+
+	# export KAFKA_HEAP_OPTS="-Xmx200M -Xms200M"
+    # cd /opt/kafka_2.12-2.3.0
+    # bin/kafka-server-start.sh config/server.properties &
+
+
+On producers
+
+	# pip install kafka-python
+
+Let's produce some messages
+
+## One producer -> Kafka
+
+Just to warm things up let's compare the performance of one producer with Kafka and Mysql.
+
+	$ python collect.py --backend kafka
+
+
+
+| Backend | TPS producer4, one thread | Prod util | Cons util         |
+| MySQL   | 238                       | CPU 11%   | CPU 21%, IO 320ms |
+| Kafka   | 147                       | CPU 25%   | CPU 9%, IO 4ms    |
+
+
+Conclusion: One producer thread is able to generate 238TPS if mysql is used as backend and 147TPS if Kafka is used. To be honest, I do not know why there is such a big difference. The concept of commit is a little bit different between Kafka and MySQL. In MySQL commit is confirmed if it is written permanently (IO sync) to the commit log. That is an expensive operation in terms of IO. In Kafka data is commited when it was written to all in-sync replicas, as we are using only one broker at this time - this is just one machine, and what is more important this is an in-memory confirmation, there is no underlying IO sync. So Kafka should be much faster than mysql in that aspect. 
+
+But we can't argue with facts, those are the numbers I get. All other differences will make it fan to watch how it goes if we introduce additional producers.
+
+Let's see how the test goes if we run it like we did with the best score for far with mysql. Let's even take the score where we were commiting every 1000 inserts to lower the pressure on IO and it was practically completely utilising CPU as well.
+
+	$ ./multi_collect.sh --backend kafka
+
+| Backend | TPS prod1-4, 2xCPU thr | Prod     | Cons util         | bottleneck |
+| MySQL   | 2840                   | CPU 70%  | CPU 90%, IO 233ms | consumer   |
+| Kafka   | 2600                   | CPU 100% | CPU 22%, IO 151ms | producers  |
+
+
+We actually got similar performance, but the test with Kafka finished with clear bottleneck on the producers side rather than in MySQL case where it was consumer that could not go on any more.
+
+Actually with 2600TPS Kafka barely makes a sweat with CPU 22% and 151ms IO time in a second.
+
+Nice, time to introduce more powerfull producers again.
+
+
 
 
 
@@ -628,6 +713,8 @@ Shutdown mysql
 ```
 # systemctl stop mariadb
 # systemctl disable mariadb
+# systemctl stop mysql
+# systemctl disable mysql
 # systemctl stop mysqld_exporter
 # systemctl disable mysqld_exporter
 ```
@@ -663,29 +750,6 @@ Configure correct Cassandra cluster IP
 	$ cd ~/scripto/python/temperature
 	$ vi collect.py
 	cluster = Cluster(contact_points=['192.168.1.20'] (leave the rest of line like it is)
-
-
-
-# Kafka (WIP)
-
-Download Kafka from https://kafka.apache.org/downloads
-```
-# cd /opt
-# wget http://ftp.man.poznan.pl/apache/kafka/2.3.0/kafka_2.12-2.3.0.tgz
-# sha512sum kafka_2.12-2.3.0.tgz 
-a5ed591ab304a1f16f7fd64183871e38aabf814a2c1ca86bb3d064c83e85a6463d3c55f4d707a29fc3d7994dd7ba1f790b5a6219c6dffdf472afd99cee37892e  kafka_2.12-2.3.0.tgz
-# tar xvzf kafka_2.12-2.3.0.tgz
-# export PATH=$PATH:/opt/kafka_2.12-2.3.0/bin
-
-# cd /opt/kafka_2.12-2.3.0
-# bin/zookeeper-server-start.sh config/zookeeper.properties &
-
-# cd /opt/kafka_2.12-2.3.0
-# bin/kafka-server-start.sh config/server.properties &
-```
-
-Let's produce some messages
-
 
 
 
