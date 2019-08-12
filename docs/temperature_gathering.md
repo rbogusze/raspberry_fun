@@ -792,9 +792,9 @@ Ok, let's check how far we can go with the score this time.
 
 	$ ./multi_collect.sh --backend cassandra
 	
-| TPS              | consumer          | producer2,4 | bottleneck   |
-|------------------|-------------------|-------------|--------------|
-| 8*70+8*60 = 1040 | CPU 100%, IO 22ms | CPU 42%,62% | consumer CPU |
+| TPS                    | consumer          | producer2,4 | bottleneck   |
+|------------------------|-------------------|-------------|--------------|
+| 8 * 70 + 8 * 60 = 1040 | CPU 100%, IO 22ms | CPU 42%,62% | consumer CPU |
 
 Actually it just takes two powerful producers, producer2 which is RPi3 and producer4 which is RPi2 to make the Cassandra reach 100% CPU utilisation. Comparing it with MySQL (2840TPS) it scores rather poorly which leads to maybe a surprising conclusion - if we were to have just one server then running it with MySQL gives much better results that NoSQL Cassandra database. However, one node Cassandra cluster is not really where it shines, as it is born to be a part of a multi node cluster, contrary to RDBMS MySQL which is usually a singleton.
 
