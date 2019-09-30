@@ -1,5 +1,7 @@
 # Motivation and roadmap
 
+![RaspPi](../images/temp17.jpg)
+
 Having couple of Raspberry Pi's laying around inspired me to try couple of scenarios out. Obviously everything could be tried on a standard bare metal, VM or Cloud infrastructure but playing with the RPi's forces you to think about all the aspects of running a computer - disk sizes, IOs, CPU, memory, network, power - which is just a nice learning experience.
 
 I have always liked databases and this is a perfect opportunity to stress them to the limits where you have the physical boundaries pretty close and can see the bottlenecks. The available resources are divided between producers of data and consumers of data. Producers simply try to insert the current CPU temperature as fast as possible. Consumers of data try to accept those inserts. 
