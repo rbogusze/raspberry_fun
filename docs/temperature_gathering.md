@@ -8,7 +8,9 @@ I have always liked databases and this is a perfect opportunity to stress them t
 
 Various types of consumers are evaluated. For classical Relational Database Management Systems (RDBMS) we have MySQL. For NoSQL database we have Apache Cassandra. For stream-processing we have Apache Kafka. I would like to do some tests with Apache Flink most likely together with Kafka and Apache Beam as that would be a nice BigData setup.
 
-That was all a nice opportunity for me to learn.
+That was all a nice opportunity for me to learn as I was moving away from Oracle Database into open-source MySQL (MariaDB) and PostgreSQL as well as trying out new things like Apache Cassandra (when learning about AWS DynamoDB and Google BigTable) or Apache Kafka (when learning about streaming solutions like Amazon Kinesis and Google Pub/Sub) or Apache Beam / Apache Flink (when learning about data processing solutions like Google Dataflow) etc. etc.
+
+There are lot's of new technologies out there I would like to try out just to know where do they fit as a great solution. So far having an opportunity to play with them (or the open source equivalent) proved to be a good way to learn. 
 
 [Monitoring and benchmarking](monitoring.md)
 
