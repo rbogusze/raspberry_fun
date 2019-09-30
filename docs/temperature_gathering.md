@@ -16,6 +16,8 @@ Even more fun with data
 
 # First things first
 
+[Monitoring and benchmarking](docs/monitoring.md)
+
 ## Install monitoring
 
 I intend to use mysql to store the temperature data, which would be a no-brainer choise 10 years ago. Now we have more options in that area, but let's first try to do it in relational database like mysql.
