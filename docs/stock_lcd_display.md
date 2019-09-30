@@ -145,6 +145,21 @@ a522356a8db4c854a8a82e9f67e308a2  apache-cassandra-2.2.13-bin.tar.gz
 # mv apache-cassandra-2.2.13 /opt/cassandra
 ```
 
+Or version 3
+
+```
+# cd /opt
+# wget https://archive.apache.org/dist/cassandra/3.11.4/apache-cassandra-3.11.4-bin.tar.gz
+# sha256sum apache-cassandra-3.11.4-bin.tar.gz
+5d598e23c3ffc4db0301ec2b313061e3208fae0f9763d4b47888237dd9069987  apache-cassandra-3.11.4-bin.tar.gz
+# tar xvzf apache-cassandra-3.11.4-bin.tar.gz
+# mv apache-cassandra-3.11.4 /opt/cassandra
+# chown -R pi:pi cassandra
+
+$ /opt/cassandra/bin/nodetool status
+```
+
+
 Make some configuration changes, make sure to use your IP address. 
 ```
 # cp /opt/cassandra/conf/cassandra.yaml /opt/cassandra/conf/cassandra.yaml_`date -I`
@@ -170,6 +185,8 @@ ExecStart=/opt/cassandra/bin/cassandra -f
 Restart=on-failure
 Environment="JAVA_HOME=/opt/jdk1.8.0_191"
 Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jdk1.8.0_191/bin"
+User=pi
+Group=pi
 
 [Install]
 WantedBy=multi-user.target
