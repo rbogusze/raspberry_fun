@@ -16,7 +16,7 @@ Even more fun with data
 
 # First things first
 
-[Monitoring and benchmarking](docs/monitoring.md)
+[Monitoring and benchmarking](monitoring.md)
 
 ## Install monitoring
 
