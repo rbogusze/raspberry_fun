@@ -1,4 +1,4 @@
-# Kafka (WIP)
+# Kafka (WIP WIP WIP)
 
 Nice links:
 - https://medium.com/activewizards-machine-learning-company/kafka-monitoring-with-prometheus-telegraf-and-grafana-6228fed736f1
