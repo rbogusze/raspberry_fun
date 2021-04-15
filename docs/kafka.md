@@ -1241,6 +1241,7 @@ Combine Kafka with Apache Beam?
 
 
 ToDo:
+- introduce schema registry and work with avro, so you do not worry about schemas
 - adding broker while the messages are flowing to the cluster
 - be able to gather statistics based on kafka metrics
 + why my topic was gone after restart?
